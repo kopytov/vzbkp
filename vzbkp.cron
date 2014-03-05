@@ -1,0 +1,5 @@
+PATH=/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+0 1 * * * root vzbkp-dump
+

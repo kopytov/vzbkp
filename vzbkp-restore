@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# vzbkp © Dmitry Kopytov <kopytov@linuxprofy.ru>
+#
+
+source "/usr/local/share/vzbkp/functions.sh"
+
+function usage {
+    echo "Usage: $0 CTID DATE"
+    exit 1
+}
+
+[ $# -ne 2 ] && usage
+CTID=$1
+DATE=$2
+DUMP=$( dump_name $CTID $DATE )
+
+mount_backup_dir
+restore $CTID $DUMP
+umount_backup_dir
+

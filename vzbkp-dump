@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# vzbkp © Dmitry Kopytov <kopytov@linuxprofy.ru>
+#
+
+source "/usr/local/share/vzbkp/functions.sh"
+
+check_md_action
+
+if [ $# -eq 0 ]
+then
+    CTIDS=$( ls /etc/vz/conf/???*.conf | cut -f5 -d/ | cut -f1 -d. )
+else
+    CTIDS=$@
+fi
+
+mount_backup_dir
+
+TODAY=$( date +%F )
+for CTID in $CTIDS
+do
+    rotate $CTID
+    DUMP=$( dump_name $CTID $TODAY )
+    dump $CTID $DUMP
+    upload_ftp $CTID $DUMP &
+done
+
+wait
+umount_backup_dir
+
