@@ -187,32 +187,9 @@ function restore {
     vzctl start $ctid
 }
 
-MOUNT_FTP_DIR_PIDFILE="/var/run/mount_ftp_dir.pid"
-
-function wait_mount_ftp_dir {
-    [ -f "$MOUNT_FTP_DIR_PIDFILE" ] || return
-
-    local mount_ftp_dir_pid=$( cat "$MOUNT_FTP_DIR_PIDFILE" )
-    [ -d "/proc/$mount_ftp_dir_pid" ] || return
-
-    while [ -d "/proc/$mount_ftp_dir_pid" ]
-    do
-        info "Waiting for PID $mount_ftp_dir_pid..."
-        sleep 60
-    done
-}
-
-function lock_mount_ftp_dir {
-    wait_mount_ftp_dir
-    echo $BASHPID > "$MOUNT_FTP_DIR_PIDFILE"
-}
-
-function unlock_mount_ftp_dir {
-    rm -f "$MOUNT_FTP_DIR_PIDFILE"
-}
+LOCK_UPLOAD_FTP="/var/lock/LCK..vzbkp-upload_ftp"
 
 function mount_ftp_dir {
-    lock_mount_ftp_dir
     if mountpoint -q "$FTP_DIR"
     then
         info "$FTP_DIR is already mounted"
@@ -234,7 +211,6 @@ function umount_ftp_dir {
         info "$FTP_DIR is already unmounted"
 
     fi
-    unlock_mount_ftp_dir
 }
 
 function upload_ftp {

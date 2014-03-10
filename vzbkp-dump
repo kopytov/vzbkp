@@ -22,7 +22,10 @@ do
     rotate $CTID
     DUMP=$( dump_name $CTID $TODAY )
     dump $CTID $DUMP
-    upload_ftp $CTID $DUMP &
+    (
+        flock 4
+        upload_ftp $CTID $DUMP
+    ) 4>"$LOCK_UPLOAD_FTP" &
 done
 
 wait
