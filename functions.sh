@@ -138,7 +138,7 @@ function dump {
     notice "Creating $dump"
     if type pigz >/dev/null 2>&1
     then
-        tar -C "$ct_private" -cf - . | pigz > "$dump"
+        tar -C "$ct_private" -I pigz -cf "$dump" .
         local tar_returnval=$?
     else
         tar -C "$ct_private" -czf "$dump" .
