@@ -134,19 +134,16 @@ function dump {
     local ct_private=$(VEID=$ctid; source /etc/vz/vz.conf; source /etc/vz/conf/$ctid.conf; echo $VE_PRIVATE)
     local disk_desriptor="$ct_private/root.hdd/DiskDescriptor.xml"
     vzctl snapshot $ctid --id $uuid
-#    local guid=$(
-#        grep -B1 "<ParentGUID>{$uuid}</ParentGUID>" $disk_desriptor | \
-#        head -n1 | sed -e 's|^.*{||' -e 's|}.*$||'
-#    )
-#    local delta=$(
-#        grep -A2 "<GUID>{$guid}</GUID>" $disk_desriptor | \
-#        grep '<File>' | sed -e 's|^.*<File>||' -e 's|</File>.*$||'
-#    )
 
     notice "Creating $dump"
-#    tar -czf "$dump" -C "$ct_private" . --exclude="$delta"
-    tar -czf "$dump" -C "$ct_private" .
-    local tar_returnval=$?
+    if type pigz >/dev/null 2>&1
+    then
+        tar -C "$ct_private" -cf - . | pigz > "$dump"
+        local tar_returnval=$?
+    else
+        tar -C "$ct_private" -czf "$dump" .
+        local tar_returnval=$?
+    fi
 
     notice "Deleting a snapshot $uuid"
     vzctl snapshot-delete $ctid --id $uuid
