@@ -133,7 +133,7 @@ function dump {
     local uuid=$(uuidgen)
     local ct_private=$(VEID=$ctid; source /etc/vz/vz.conf; source /etc/vz/conf/$ctid.conf; echo $VE_PRIVATE)
     local disk_desriptor="$ct_private/root.hdd/DiskDescriptor.xml"
-    vzctl snapshot $ctid --id $uuid
+    vzctl snapshot $ctid --id $uuid --skip-suspend
 
     notice "Creating $dump"
     if type pigz >/dev/null 2>&1
