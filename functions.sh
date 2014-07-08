@@ -84,6 +84,12 @@ function rotate_dumps {
     fi
 }
 
+function recent_date {
+    local ctid=$1
+    local suffix=$2
+    ls -1 "$BACKUP_DIR"/vzbkp-$ctid-????-??-??-$suffix.tar.gz | sort -rn | head -n1 | sed -e "s|.*vzbkp-$ctid-\(.*\)-$suffix.*|\1|"
+}
+
 function link_recent_dump {
     local ctid=$1
     local suffix=$2
@@ -105,18 +111,29 @@ function rotate {
     notice "Rotating daily dumps of CT $ctid"
     rotate_dumps $ctid "$BACKUP_DIR" "$NUM_DAILY"
 
-    if [ $NUM_WEEKLY -gt 0 ] && [ $( date +%w ) == "0" ]
+    local days7=604800
+    if [ $NUM_WEEKLY -gt 0 ]
     then
-        notice "Rotating weekly dumps of CT $ctid"
-        rotate_dumps $ctid "$BACKUP_DIR" "$NUM_WEEKLY" "weekly"
-        link_recent_dump $ctid "weekly"
+        local recent_date=$( recent_date $ctid "weekly" )
+        echo $recent_date
+        if [ -n "$recent_date" ] && [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days7 ]
+        then
+            notice "Rotating weekly dumps of CT $ctid"
+            rotate_dumps $ctid "$BACKUP_DIR" "$NUM_WEEKLY" "weekly"
+            link_recent_dump $ctid "weekly"
+        fi
     fi
 
-    if [ $NUM_MONTHLY -gt 0 ] && [ $( date +%d ) == "01" ]
+    local days30=2592000
+    if [ $NUM_MONTHLY -gt 0 ]
     then
-        notice "Rotating monthly dumps of CT $ctid"
-        rotate_dumps $ctid "$BACKUP_DIR" "$NUM_MONTHLY" "monthly"
-        link_recent_dump $ctid "monthly"
+        local recent_date=$( recent_date $ctid "monthly" )
+        if [ -n "$recent_date" ] && [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days30 ]
+        then
+            notice "Rotating monthly dumps of CT $ctid"
+            rotate_dumps $ctid "$BACKUP_DIR" "$NUM_MONTHLY" "monthly"
+            link_recent_dump $ctid "monthly"
+        fi
     fi
 }
 
