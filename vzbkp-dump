@@ -24,7 +24,7 @@ do
     dump $CTID $DUMP
     (
         flock 4
-        upload_ftp $CTID $DUMP
+        [ -n "$FTP_DIR" ] && upload_ftp $CTID $DUMP
     ) 4>"$LOCK_UPLOAD_FTP" &
 done
 
