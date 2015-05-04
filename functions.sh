@@ -115,7 +115,6 @@ function rotate {
     if [ $NUM_WEEKLY -gt 0 ]
     then
         local recent_date=$( recent_date $ctid "weekly" )
-        echo $recent_date
         if [ -z "$recent_date" ] || [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days7 ]
         then
             notice "Rotating weekly dumps of CT $ctid"
