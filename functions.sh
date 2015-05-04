@@ -30,7 +30,7 @@ function dump_name {
 
 function recent_dump {
     local ctid=$1
-    ls -1 "$BACKUP_DIR"/vzbkp-$ctid-????-??-??.tar.gz | sort | tail -n 1
+    ls -1 "$BACKUP_DIR"/vzbkp-$ctid-????-??-??.tar.gz 2>/dev/null | sort | tail -n 1
 }
 
 function mount_backup_dir {
@@ -116,7 +116,7 @@ function rotate {
     then
         local recent_date=$( recent_date $ctid "weekly" )
         echo $recent_date
-        if [ -n "$recent_date" ] && [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days7 ]
+        if [ -z "$recent_date" ] || [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days7 ]
         then
             notice "Rotating weekly dumps of CT $ctid"
             rotate_dumps $ctid "$BACKUP_DIR" "$NUM_WEEKLY" "weekly"
@@ -128,7 +128,7 @@ function rotate {
     if [ $NUM_MONTHLY -gt 0 ]
     then
         local recent_date=$( recent_date $ctid "monthly" )
-        if [ -n "$recent_date" ] && [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days30 ]
+        if [ -z "$recent_date" ] || [ $(( $( date +%s ) - $( date +%s -d "$recent_date" ) )) -gt $days30 ]
         then
             notice "Rotating monthly dumps of CT $ctid"
             rotate_dumps $ctid "$BACKUP_DIR" "$NUM_MONTHLY" "monthly"
